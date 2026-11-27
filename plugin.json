@@ -1,0 +1,29 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "epub-reader",
+  "displayName": "EPUB Reader",
+  "version": "0.1.0",
+  "description": "Read, search, and highlight EPUB books in the Antigravity side panel with persistent notes and 1-click quote to chat.",
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "List the chapters in my EPUB book and summarize Chapter 1",
+    "Search my EPUB book for key technical terms and quote the matching passages",
+    "Review my saved EPUB highlights and turn them into an actionable study checklist"
+  ],
+  "author": {
+    "name": "a-wallen",
+    "url": "https://github.com/a-wallen"
+  },
+  "homepage": "https://github.com/a-wallen/epub-reader",
+  "repository": "https://github.com/a-wallen/epub-reader",
+  "license": "MIT",
+  "keywords": [
+    "epub",
+    "ebook",
+    "reader",
+    "highlights",
+    "annotations",
+    "study",
+    "mcp-app"
+  ]
+}
