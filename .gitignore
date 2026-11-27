@@ -7,3 +7,6 @@ dist/
 coverage/
 tmp/
 .tmp/
+*.epub
+!tests/fixtures/sample.epub
+

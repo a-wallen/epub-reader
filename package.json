@@ -1,0 +1,37 @@
+{
+  "name": "epub-reader",
+  "version": "0.1.0",
+  "description": "IDE-agnostic EPUB study reader and MCP App server with adapters for Antigravity, BaoCode, and standard MCP clients.",
+  "type": "module",
+  "license": "MIT",
+  "author": "a-wallen",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a-wallen/epub-reader.git"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsx tools/build.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "validate": "tsx tests/validate-plugin.ts",
+    "package": "tsx tools/package-release.ts"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@lingo-reader/epub-parser": "^0.4.7",
+    "@modelcontextprotocol/ext-apps": "^2.0.4",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@types/html-to-text": "^9.0.4",
+    "@types/jszip": "^3.4.0",
+    "@types/node": "^22.0.0",
+    "epubjs": "0.3.93",
+    "esbuild": "^0.25.0",
+    "html-to-text": "^10.0.1",
+    "jszip": "3.10.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "zod": "^4.6.7"
+  }
+}

@@ -1,0 +1,3 @@
+# Collapse compiled runtime outputs in GitHub PR diffs
+scripts/** linguist-generated=true
+tests/fixtures/*.epub linguist-generated=true
