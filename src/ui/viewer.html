@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EPUB Reader — Antigravity Study Companion</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--background, #0f172a);
+      color: var(--foreground, #f8fafc);
+      font-size: 14px;
+    }
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100vh;
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--card, #1e293b);
+      border-bottom: 1px solid var(--border, #334155);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .book-title {
+      font-weight: 600;
+      font-size: 13px;
+      max-width: 240px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chapter-badge {
+      font-size: 12px;
+      color: var(--muted-foreground, #94a3b8);
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    button, .btn-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--secondary, #334155);
+      color: var(--foreground, #f8fafc);
+      border: 1px solid var(--border, #475569);
+      border-radius: 6px;
+      padding: 4px 9px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+    }
+    button:hover, .btn-label:hover {
+      border-color: var(--primary, #38bdf8);
+    }
+    button.primary {
+      background: var(--primary, #38bdf8);
+      color: var(--primary-foreground, #0f172a);
+      border-color: transparent;
+      font-weight: 600;
+    }
+    input[type="search"] {
+      background: var(--background, #0f172a);
+      color: var(--foreground, #f8fafc);
+      border: 1px solid var(--border, #334155);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      width: 150px;
+    }
+    .workspace {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      position: relative;
+    }
+    .drawer {
+      width: 260px;
+      background: var(--card, #1e293b);
+      border-right: 1px solid var(--border, #334155);
+      overflow-y: auto;
+      padding: 10px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .drawer.open {
+      display: flex;
+    }
+    .drawer-header {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted-foreground, #94a3b8);
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border, #334155);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .toc-item {
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--foreground, #f8fafc);
+      line-height: 1.35;
+    }
+    .toc-item:hover, .toc-item.active {
+      background: var(--secondary, #334155);
+      color: var(--primary, #38bdf8);
+    }
+    .reader-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      position: relative;
+      background: var(--background, #0f172a);
+    }
+    #viewer {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      position: relative;
+    }
+    .fallback-chapter {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 28px 32px;
+      line-height: 1.7;
+    }
+    .selection-toolbar {
+      position: absolute;
+      bottom: 54px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card, #1e293b);
+      border: 1px solid var(--primary, #38bdf8);
+      border-radius: 10px;
+      padding: 6px 10px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+      z-index: 50;
+    }
+    .selection-toolbar.visible {
+      display: flex;
+    }
+    .swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.25);
+    }
+    .swatch.yellow { background: #facc15; }
+    .swatch.cyan { background: #38bdf8; }
+    .swatch.green { background: #4ade80; }
+    .highlight-card {
+      background: var(--background, #0f172a);
+      border: 1px solid var(--border, #334155);
+      border-left: 3px solid #facc15;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .highlight-card.cyan { border-left-color: #38bdf8; }
+    .highlight-card.green { border-left-color: #4ade80; }
+    .footer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: var(--card, #1e293b);
+      border-top: 1px solid var(--border, #334155);
+      font-size: 12px;
+      color: var(--muted-foreground, #94a3b8);
+      flex-shrink: 0;
+    }
+  </style>
+  <script>
+    /* __INJECT_VENDOR_BUNDLE__ */
+  </script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="toolbar">
+      <div class="toolbar-group">
+        <button id="btn-toc" title="Toggle Table of Contents">☰ Chapters</button>
+        <span class="book-title" id="book-title">EPUB Study Reader</span>
+        <span class="chapter-badge" id="chapter-label">No book loaded</span>
+      </div>
+      <div class="toolbar-group">
+        <input type="search" id="search-input" placeholder="Search book..." />
+        <button id="btn-search">Find</button>
+        <button id="btn-flow" title="Toggle Paginated / Scrolled Mode">Mode: Paginated</button>
+        <button id="btn-font-dec" title="Decrease font size">A-</button>
+        <button id="btn-font-inc" title="Increase font size">A+</button>
+        <button id="btn-highlights" title="View Saved Highlights">★ Highlights (<span id="hl-count">0</span>)</button>
+        <label class="btn-label" for="file-picker" title="Open local .epub file">📂 Open .epub</label>
+        <input type="file" id="file-picker" accept=".epub" style="display:none" />
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="drawer" id="toc-drawer">
+        <div class="drawer-header">
+          <span id="drawer-title">Table of Contents</span>
+        </div>
+        <div id="toc-list"></div>
+      </aside>
+
+      <aside class="drawer" id="highlights-drawer">
+        <div class="drawer-header">
+          <span>Saved Highlights</span>
+          <button id="btn-export-md" class="primary">Export .md</button>
+        </div>
+        <div id="highlights-list"></div>
+      </aside>
+
+      <main class="reader-main">
+        <div id="viewer">
+          <div class="fallback-chapter" id="empty-state">
+            <h2>EPUB Study Reader Ready</h2>
+            <p>Click any <code>.epub</code> file in the Antigravity file tree to open it automatically via the <code>file</code> entrypoint, or use <strong>📂 Open .epub</strong> above.</p>
+            <p>Select any passage while reading to <strong>Highlight</strong> (Yellow = Core Concept, Cyan = Technical Spec, Green = Action Check) or <strong>💬 Quote to Chat</strong>.</p>
+          </div>
+        </div>
+
+        <div class="selection-toolbar" id="selection-toolbar">
+          <span class="swatch yellow" data-color="yellow" title="Highlight: Core Concept"></span>
+          <span class="swatch cyan" data-color="cyan" title="Highlight: Technical Spec"></span>
+          <span class="swatch green" data-color="green" title="Highlight: Action Check"></span>
+          <button id="btn-add-note">+ Note</button>
+          <button id="btn-quote-chat" class="primary">💬 Quote to Chat</button>
+        </div>
+      </main>
+    </div>
+
+    <footer class="footer-bar">
+      <div class="toolbar-group">
+        <button id="btn-prev">‹ Prev</button>
+        <button id="btn-next">Next ›</button>
+      </div>
+      <span id="status-text">Ready</span>
+    </footer>
+  </div>
+
+  <script>
+    /* __INJECT_CLIENT_BUNDLE__ */
+  </script>
+</body>
+</html>
